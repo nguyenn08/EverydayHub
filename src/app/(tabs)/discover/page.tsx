@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Bell, MapPin, Bookmark, Share2, Navigation } from 'lucide-react'
+import { Bell, MapPin, Bookmark, Share2, Navigation, X } from 'lucide-react'
+import Toast from '@/components/Toast'
 
 const stories = [
   { name: "Berea Barber", initials: "BB", isNew: true  },
@@ -10,6 +11,12 @@ const stories = [
   { name: "Gridiron Cut", initials: "GC", isNew: false },
   { name: "Mama Rosa's",  initials: "MR", isNew: false },
   { name: "Berea Brew",   initials: "BR", isNew: false },
+]
+
+const notifications = [
+  { text: "The Corner Arcade just opened 0.3 mi away — first round's on the house this week.", time: "2h ago" },
+  { text: "Berea Barber Co. posted a new deal: $5 off your first cut.", time: "5h ago" },
+  { text: "Reminder: Browns watch party at Berea Brewing Co. starts Sunday at 1 PM.", time: "1d ago" },
 ]
 
 interface Post {
@@ -142,14 +149,73 @@ const filters = ['All', 'Events', 'Eats', 'Nightlife', 'Deals', 'New', 'Sports']
 
 export default function DiscoverPage() {
   const [active, setActive] = useState('All')
+  const [businessFilter, setBusinessFilter] = useState<string | null>(null)
+  const [saved, setSaved] = useState<Set<number>>(new Set())
+  const [shareFeedback, setShareFeedback] = useState<number | null>(null)
+  const [showNotifications, setShowNotifications] = useState(false)
+  const [toast, setToast] = useState<string | null>(null)
 
-  const posts = allPosts.filter(p => active === 'All' || p.filter.includes(active))
+  function flash(msg: string) {
+    setToast(msg)
+    setTimeout(() => setToast(null), 2000)
+  }
+
+  const posts = allPosts.filter(p => {
+    if (businessFilter && p.initials !== businessFilter) return false
+    return active === 'All' || p.filter.includes(active)
+  })
+
+  function toggleSave(i: number) {
+    setSaved(prev => {
+      const next = new Set(prev)
+      if (next.has(i)) {
+        next.delete(i)
+        flash('Removed from saved')
+      } else {
+        next.add(i)
+        flash('Saved to your places')
+      }
+      return next
+    })
+  }
+
+  function openDirections(post: Post) {
+    const query = encodeURIComponent(`${post.business}, Berea, OH`)
+    window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank', 'noopener,noreferrer')
+  }
+
+  async function handleShare(post: Post, i: number) {
+    const shareData = {
+      title: post.business,
+      text: post.body,
+      url: typeof window !== 'undefined' ? window.location.origin + '/discover' : '',
+    }
+    try {
+      if (typeof navigator !== 'undefined' && navigator.share) {
+        await navigator.share(shareData)
+      } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+        await navigator.clipboard.writeText(`${post.business} — ${post.body}`)
+        setShareFeedback(i)
+        setTimeout(() => setShareFeedback(null), 1800)
+      }
+    } catch {
+      // user dismissed the share sheet — nothing to do
+    }
+  }
+
+  function toggleStory(initials: string) {
+    setBusinessFilter(prev => (prev === initials ? null : initials))
+  }
+
+  const filteredBusinessName = businessFilter
+    ? stories.find(s => s.initials === businessFilter)?.name
+    : null
 
   return (
     <div className="flex flex-col bg-[#0a1628] min-h-screen">
 
       {/* Header */}
-      <div className="px-5 pt-14 md:pt-8 pb-3 flex items-center justify-between">
+      <div className="px-5 pt-14 md:pt-8 pb-3 flex items-center justify-between relative">
         <div>
           <h1 className="text-2xl font-bold text-white tracking-tight">Discover</h1>
           <div className="flex items-center gap-1 mt-0.5">
@@ -157,10 +223,30 @@ export default function DiscoverPage() {
             <span className="text-[#8ba3c7] text-xs">Berea, Ohio</span>
           </div>
         </div>
-        <div className="relative">
+        <button onClick={() => setShowNotifications(v => !v)} className="relative active:scale-90 transition-transform">
           <Bell size={22} className="text-white" strokeWidth={1.8} />
           <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-[#93c5fd] rounded-full border border-[#0a1628]" />
-        </div>
+        </button>
+
+        {showNotifications && (
+          <>
+            <div className="fixed inset-0 z-20" onClick={() => setShowNotifications(false)} />
+            <div className="absolute right-5 top-16 z-30 w-72 bg-[#0f1f38] border border-[#1e3a5f] rounded-2xl shadow-2xl shadow-black/50 overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-[#162040]">
+                <p className="text-white font-semibold text-sm">Notifications</p>
+                <button onClick={() => setShowNotifications(false)} className="text-[#4a6488] hover:text-white transition-colors">
+                  <X size={16} />
+                </button>
+              </div>
+              {notifications.map((n, i) => (
+                <div key={i} className="px-4 py-3 border-b border-[#162040] last:border-b-0">
+                  <p className="text-[#c3d2e8] text-xs leading-relaxed">{n.text}</p>
+                  <p className="text-[#4a6488] text-[10px] mt-1">{n.time}</p>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </div>
 
       {/* Filter chips */}
@@ -181,23 +267,43 @@ export default function DiscoverPage() {
       </div>
 
       {/* Stories */}
-      <div className="flex gap-3 px-5 pb-5 overflow-x-auto no-scrollbar">
-        {stories.map((s) => (
-          <button key={s.name} className="flex flex-col items-center gap-1.5 shrink-0">
-            <div className={`p-[2.5px] rounded-2xl ${s.isNew ? 'bg-gradient-to-br from-[#93c5fd] to-blue-400' : 'bg-[#1e3a5f]'}`}>
-              <div className="bg-[#0a1628] p-[2px] rounded-[13px]">
-                <div className="w-14 h-14 rounded-xl bg-[#0f1f38] flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">{s.initials}</span>
+      <div className="flex gap-3 px-5 pb-3 overflow-x-auto no-scrollbar">
+        {stories.map((s) => {
+          const isSelected = businessFilter === s.initials
+          const isDimmed = businessFilter !== null && !isSelected
+          return (
+            <button
+              key={s.name}
+              onClick={() => toggleStory(s.initials)}
+              className={`flex flex-col items-center gap-1.5 shrink-0 transition-all active:scale-95 ${isDimmed ? 'opacity-40' : 'opacity-100'}`}
+            >
+              <div className={`p-[2.5px] rounded-2xl ${isSelected ? 'bg-[#93c5fd]' : s.isNew ? 'bg-gradient-to-br from-[#93c5fd] to-blue-400' : 'bg-[#1e3a5f]'}`}>
+                <div className="bg-[#0a1628] p-[2px] rounded-[13px]">
+                  <div className="w-14 h-14 rounded-xl bg-[#0f1f38] flex items-center justify-center">
+                    <span className="text-white font-bold text-sm">{s.initials}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-            <span className="text-[10px] text-[#8ba3c7] w-14 text-center truncate">{s.name}</span>
-          </button>
-        ))}
+              <span className={`text-[10px] w-14 text-center truncate ${isSelected ? 'text-[#93c5fd] font-semibold' : 'text-[#8ba3c7]'}`}>{s.name}</span>
+            </button>
+          )
+        })}
       </div>
+
+      {businessFilter && (
+        <div className="px-5 pb-4 flex items-center gap-2">
+          <span className="text-[#8ba3c7] text-xs">Showing posts from <span className="text-[#93c5fd] font-semibold">{filteredBusinessName}</span></span>
+          <button onClick={() => setBusinessFilter(null)} className="text-[#4a6488] hover:text-white transition-colors">
+            <X size={13} />
+          </button>
+        </div>
+      )}
 
       {/* Feed — short, scannable posts */}
       <div className="flex flex-col">
+        {posts.length === 0 && (
+          <p className="text-center text-[#4a6488] text-sm py-12">No posts match this filter yet.</p>
+        )}
         {posts.map((post, i) => (
           <article
             key={i}
@@ -234,23 +340,35 @@ export default function DiscoverPage() {
             )}
 
             <div className="flex items-center gap-6 mt-3.5">
-              <button className="flex items-center gap-1.5 text-[#4a6488] hover:text-[#93c5fd] transition-colors">
-                <Bookmark size={15} strokeWidth={1.8} />
-                <span className="text-xs">Save</span>
+              <button
+                onClick={() => toggleSave(i)}
+                className={`flex items-center gap-1.5 transition-colors active:scale-95 ${
+                  saved.has(i) ? 'text-[#93c5fd]' : 'text-[#4a6488] hover:text-[#93c5fd]'
+                }`}
+              >
+                <Bookmark size={15} strokeWidth={1.8} fill={saved.has(i) ? 'currentColor' : 'none'} />
+                <span className="text-xs">{saved.has(i) ? 'Saved' : 'Save'}</span>
               </button>
-              <button className="flex items-center gap-1.5 text-[#4a6488] hover:text-[#93c5fd] transition-colors">
+              <button
+                onClick={() => openDirections(post)}
+                className="flex items-center gap-1.5 text-[#4a6488] hover:text-[#93c5fd] transition-colors active:scale-95"
+              >
                 <Navigation size={15} strokeWidth={1.8} />
                 <span className="text-xs">Directions</span>
               </button>
-              <button className="flex items-center gap-1.5 text-[#4a6488] hover:text-[#93c5fd] transition-colors">
+              <button
+                onClick={() => handleShare(post, i)}
+                className="flex items-center gap-1.5 text-[#4a6488] hover:text-[#93c5fd] transition-colors active:scale-95"
+              >
                 <Share2 size={15} strokeWidth={1.8} />
-                <span className="text-xs">Share</span>
+                <span className="text-xs">{shareFeedback === i ? 'Copied!' : 'Share'}</span>
               </button>
             </div>
           </article>
         ))}
       </div>
 
+      <Toast message={toast ?? ''} show={!!toast} />
     </div>
   )
 }
