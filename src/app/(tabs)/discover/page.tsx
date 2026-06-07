@@ -5,18 +5,18 @@ import { Bell, MapPin, Bookmark, Share2, Navigation, X } from 'lucide-react'
 import Toast from '@/components/Toast'
 
 const stories = [
-  { name: "Berea Barber", initials: "BB", isNew: true  },
-  { name: "The Depot",    initials: "TD", isNew: true  },
-  { name: "Corner Arcade",initials: "CA", isNew: true  },
-  { name: "Gridiron Cut", initials: "GC", isNew: false },
-  { name: "Mama Rosa's",  initials: "MR", isNew: false },
-  { name: "Berea Brew",   initials: "BR", isNew: false },
+  { name: "Berea Barber",    initials: "BB", isNew: false },
+  { name: "Cornerstone",     initials: "CN", isNew: true  },
+  { name: "Mike's B&G",      initials: "MG", isNew: false },
+  { name: "Jo Jo Carloni's", initials: "JC", isNew: false },
+  { name: "Upper Deck",      initials: "UD", isNew: true  },
+  { name: "Parkway Barber",  initials: "PB", isNew: false },
 ]
 
 const notifications = [
-  { text: "The Corner Arcade just opened 0.3 mi away — first round's on the house this week.", time: "2h ago" },
-  { text: "Berea Barber Co. posted a new deal: $5 off your first cut.", time: "5h ago" },
-  { text: "Reminder: Browns watch party at Berea Brewing Co. starts Sunday at 1 PM.", time: "1d ago" },
+  { text: "Mike's Bar & Grille just joined EverydayHub — see what's on tap this week.", time: "2h ago" },
+  { text: "Berea Barber Shop opened new booking slots for this weekend.", time: "5h ago" },
+  { text: "Reminder: Live at the Lake kicks off Saturday at Coe Lake Park, 7 PM.", time: "1d ago" },
 ]
 
 interface Post {
@@ -27,94 +27,99 @@ interface Post {
   tagColor: string
   body: string
   filter: string[]
-  imageSeed?: string
+  imageUrl?: string
 }
 
 const allPosts: Post[] = [
   {
-    business: "Berea Summer Fest",
-    initials: "SF",
+    business: "Live at the Lake",
+    initials: "LL",
     meta: "Coe Lake Park · 3h",
-    tag: "This Saturday",
+    tag: "Summer Series · Saturdays",
     tagColor: "text-purple-300",
-    body: "🎪 Live music, food trucks, and local vendors at Coe Lake Park. Free admission, 12–9 PM.",
-    filter: ["Events"],
-    imageSeed: "berea-summer-fest",
+    body: "🎶 Free outdoor concerts at Coe Lake Park all summer long — bring a chair, grab dinner from a food truck, and catch live music under the stars.",
+    filter: ["Events", "New"],
+    imageUrl: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&h=400&fit=crop&auto=format",
   },
   {
-    business: "The Corner Arcade",
-    initials: "CA",
+    business: "The Cornerstone Brewing Co.",
+    initials: "CN",
     meta: "Front St · 5h",
-    tag: "Just Opened",
+    tag: "Brewpub · Local Favorite",
     tagColor: "text-[#93c5fd]",
-    body: "🕹️ Berea's first arcade bar is open — 40+ machines, craft cocktails, no cover. Open till 2 AM this week.",
-    filter: ["New", "Nightlife"],
-    imageSeed: "corner-arcade-berea",
+    body: "🍺 House-brewed drafts, wood-fired pizza, and a menu built for sharing — one of Berea's go-to spots for catching the game with a crowd.",
+    filter: ["Eats", "Nightlife", "Sports"],
+    imageUrl: "https://images.unsplash.com/photo-1559818488-89c85b8b60bc?w=600&h=400&fit=crop&auto=format",
   },
   {
-    business: "The Depot Grille",
-    initials: "TD",
+    business: "Mike's Bar & Grille",
+    initials: "MG",
     meta: "0.5 mi · 8h",
-    tag: "Filling Up Fast",
+    tag: "Neighborhood Pub",
     tagColor: "text-[#93c5fd]",
-    body: "🍽️ Prime rib Fridays are already a thing here. Grab a table before the weekend's gone.",
-    filter: ["Eats"],
+    body: "🍻 A deep craft beer lineup, solid cocktails, and classic pub fare — the kind of bar where regulars have their usual spot.",
+    filter: ["Eats", "Nightlife"],
+    imageUrl: "https://images.unsplash.com/photo-1575037614876-c38a4d44f5b8?w=600&h=400&fit=crop&auto=format",
   },
   {
     business: "Berea Farmers Market",
     initials: "FM",
-    meta: "Triangle Park · 11h",
-    tag: "Every Saturday",
+    meta: "Downtown Berea · 11h",
+    tag: "Saturdays · 50th Year",
     tagColor: "text-green-300",
-    body: "🌿 Back this week, 8 AM–1 PM. 30+ local vendors — produce, honey, flowers, baked goods.",
+    body: "🌿 Local produce, baked goods, and handmade crafts from area vendors — every Saturday morning, now celebrating 50 years running.",
     filter: ["Events", "New"],
-    imageSeed: "berea-farmers-market",
+    imageUrl: "https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=600&h=400&fit=crop&auto=format",
   },
   {
-    business: "Berea Barber Co.",
+    business: "Berea Barber Shop",
     initials: "BB",
-    meta: "0.4 mi · 1d",
-    tag: "Deal · Ends Sunday",
-    tagColor: "text-yellow-300",
-    body: "✂️ $5 off your first cut through Sunday. Walk-ins welcome — slots are going fast.",
-    filter: ["Deals"],
+    meta: "N Rocky River Dr · 1d",
+    tag: "Licensed Barbers & Stylists",
+    tagColor: "text-[#93c5fd]",
+    body: "✂️ Licensed barbers and cosmetologists working on every hair type and style — a Rocky River Drive staple for sharp, dependable cuts.",
+    filter: [],
+    imageUrl: "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=600&h=400&fit=crop&auto=format",
   },
   {
-    business: "Berea Brewing Co.",
-    initials: "BR",
-    meta: "0.9 mi · 1d",
-    tag: "Sunday · 1 PM",
-    tagColor: "text-orange-300",
-    body: "🏈 Tables held for the Browns opener. $2 off drafts all game — get there early, it fills up.",
-    filter: ["Events", "Nightlife", "Sports"],
+    business: "CLE Market Berea",
+    initials: "CM",
+    meta: "Coe Lake Park · 4h",
+    tag: "Pop-Up Market",
+    tagColor: "text-green-300",
+    body: "🛍️ A rotating pop-up market at Coe Lake featuring local makers, food vendors, and small businesses from across Berea and the west side.",
+    filter: ["Events", "New"],
+    imageUrl: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop&auto=format",
   },
   {
-    business: "Mama Rosa's Italian",
-    initials: "MR",
+    business: "Jo Jo Carloni's Italian",
+    initials: "JC",
     meta: "1.2 mi · 1d",
-    tag: "Deal · This Weekend",
-    tagColor: "text-yellow-300",
-    body: "🍝 Two entrées, dessert, and a bottle of wine for $55. Saturday tables are filling fast.",
-    filter: ["Eats", "Deals"],
-    imageSeed: "mama-rosas-italian",
+    tag: "Italian · Pizzeria",
+    tagColor: "text-[#93c5fd]",
+    body: "🍕 Family-style Italian and wood-fired pizza in the heart of Berea — a regular stop for date nights and Friday pizza runs.",
+    filter: ["Eats"],
+    imageUrl: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&h=400&fit=crop&auto=format",
   },
   {
-    business: "Main Street Bowl",
-    initials: "MB",
+    business: "Upper Deck Bar & Grill",
+    initials: "UD",
     meta: "Main St · 2d",
-    tag: "Fri & Sat Nights",
+    tag: "Live Music · Karaoke",
     tagColor: "text-[#93c5fd]",
-    body: "🎳 Cosmic bowling is back — lights out, UV on, $6/person including shoes.",
+    body: "🎤 Live music and karaoke nights that turn into the whole bar singing along — a Berea night-out staple.",
     filter: ["Nightlife"],
+    imageUrl: "https://images.unsplash.com/photo-1516997121675-4c2d1684aa3e?w=600&h=400&fit=crop&auto=format",
   },
   {
-    business: "The Ohio Fade",
-    initials: "OF",
-    meta: "Bagley Rd · 2d",
-    tag: "New Shop",
+    business: "Parkway Barber & Styling",
+    initials: "PB",
+    meta: "Parkway Shops · 2d",
+    tag: "50+ Years in Berea",
     tagColor: "text-[#93c5fd]",
-    body: "✂️ Just opened on Bagley Rd. First 50 clients get a free style upgrade — open daily 9–7.",
-    filter: ["New"],
+    body: "✂️ Classic barbershop cuts, modern styles, and hot lather neck and face shaves — keeping Berea looking sharp for over five decades.",
+    filter: [],
+    imageUrl: "https://images.unsplash.com/photo-1622286342621-4bd78ef4da25?w=600&h=400&fit=crop&auto=format",
   },
   {
     business: "Cleveland Browns",
@@ -124,6 +129,7 @@ const allPosts: Post[] = [
     tagColor: "text-orange-300",
     body: "🏈 Training camp practices are open to the public this week at the Berea facility. Free admission, gates open 9 AM — bring the family.",
     filter: ["Sports", "Events"],
+    imageUrl: "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=600&h=400&fit=crop&auto=format",
   },
   {
     business: "Baldwin Wallace Athletics",
@@ -133,6 +139,7 @@ const allPosts: Post[] = [
     tagColor: "text-yellow-300",
     body: "🐝 Yellow Jackets host their home opener Saturday. Tailgate starts at noon, kickoff at 2 PM — alumni and community welcome.",
     filter: ["Sports", "Events"],
+    imageUrl: "https://images.unsplash.com/photo-1508098682722-e99c643e7f0b?w=600&h=400&fit=crop&auto=format",
   },
   {
     business: "Berea-Midpark Titans",
@@ -142,6 +149,7 @@ const allPosts: Post[] = [
     tagColor: "text-purple-300",
     body: "🏈 Friday night lights are back — Titans host their rivalry game this week. Student section gates open at 6, kickoff at 7.",
     filter: ["Sports", "Events"],
+    imageUrl: "https://images.unsplash.com/photo-1567108483195-de5d8b88b739?w=600&h=400&fit=crop&auto=format",
   },
 ]
 
@@ -327,11 +335,11 @@ export default function DiscoverPage() {
               {post.body}
             </p>
 
-            {post.imageSeed && (
+            {post.imageUrl && (
               <div className="mt-3 h-44 rounded-2xl border border-[#1e3a5f] overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={`https://picsum.photos/seed/${post.imageSeed}/600/400`}
+                  src={post.imageUrl}
                   alt={post.business}
                   className="w-full h-full object-cover"
                   loading="lazy"
